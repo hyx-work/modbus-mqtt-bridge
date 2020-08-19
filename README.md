@@ -29,4 +29,5 @@ or
 
 **本人微信**
 
-![image](./img/wx.jpg)
+ ![](https://ftp.bmp.ovh/imgs/2020/08/cf9b8c40d448d2c7.jpg) 
+
