@@ -25,7 +25,7 @@ or
 
 **打赏**
 
-![image](./img/pay.png)
+![pay](https://github.com/hyx-work/modbus-mqtt-bridge/raw/master/img/pay.png)
 
 **本人微信**
 
