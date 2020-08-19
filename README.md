@@ -25,7 +25,7 @@ or
 
 **打赏**
 
-![pay](https://github.com/hyx-work/modbus-mqtt-bridge/raw/master/img/pay.png)
+![dQH1M9.png](https://s1.ax1x.com/2020/08/19/dQH1M9.png)
 
 **本人微信**
 
