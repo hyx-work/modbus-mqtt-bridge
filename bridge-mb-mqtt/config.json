@@ -1,0 +1,255 @@
+{
+  modbus:{
+  	uart: "/dev/ttyS0",
+  	baudrate: 9600
+  },
+
+  mqtt:{
+  	host: "atwl.com.cn",
+  	port: 1883,
+  	keepalive: 60,
+  	user: null,
+  	passwd: null,
+ 
+  	subTopic:[
+  	"modbus/#",
+  	"homeassistant/switch/+/set"
+  	"homeassistant/register/+/set"
+  	]
+  },
+
+  modbusPubTopic:[
+   	{
+  		topic: "homeassistant/switch/READ_COILS/state",
+  		label: "READ COILS TEST",
+  		script: "var makePayload=function(data,n) {
+	  		var res=new Array()
+	  		for(i=0;i<data.length;i++){
+				if(data[i])
+					res.push('ON')
+				else
+					res.push('OFF')
+	  		}
+ 			return res.join(',')
+ 		}",
+  		slaveid: 1,
+  		address: 0,
+  		funCode: 1,
+  		dataLen: 9
+  	},
+  	{
+  		topic: "homeassistant/switch/READ_DISCRETE_INPUTS/state",
+  		label: "READ DISCRETE INPUTS TEST",
+  		script: "var makePayload=function(data,n) {
+	  		var res=new Array()
+	  		for(i=0;i<data.length;i++){
+				if(data[i])
+					res.push('ON')
+				else
+					res.push('OFF')
+	  		}
+ 			return JSON.stringify(res)
+ 		}",
+  		slaveid: 1,
+  		address: 0,
+  		funCode: 2,
+  		dataLen: 10
+  	},
+  	{
+  		topic: "homeassistant/register/READ_HOLDING_REGISTERS/state",
+  		label: "READ HOLDING REGISTERS TEST",
+  		script: "var makePayload=function(data,n) {
+	  		var res=new Array()
+	  		var temp
+	  		if(data.length===1){
+	  			if(data[0]>>15){
+	  				temp = data[0]-1 // 反码
+	  				temp = ~temp &0x7FFF //对应正整数
+	  				temp  =~temp+1 //对应负数
+	  			}
+	  			else{
+	  				temp = data[0]
+	  			}
+	  			temp=temp/10
+	  			return JSON.stringify({something:temp})
+	  		}
+	  		else
+	  		{
+		  		for(i=0;i<data.length;i++){
+		  			if(data[i]>>15){
+		  				temp = data[i]-1 // 反码
+		  				temp = ~temp &0x7FFF //对应正整数
+		  				temp  =~temp+1 //对应负数
+		  			}
+		  			else{
+		  				temp = data[i]
+		  			}
+		  			temp=temp/10
+					res.push({something:temp})
+		  		}
+	 			return JSON.stringify(res)
+ 			}
+ 		}",
+  		slaveid: 1,
+  		address: 0,
+  		funCode: 3,
+  		dataLen: 2
+  	},
+  	{
+  		topic: "homeassistant/register/READ_INPUT_REGISTERS/state",
+  		label: "READ INPUT REGISTERS TEST",
+  		script: "var makePayload=function(data,n) {
+	  		var res=new Array()
+	  		var temp
+	  		if(data.length===1){
+	  			if(data[0]>>15){
+	  				temp = data[0]-1 // 反码
+	  				temp = ~temp &0x7FFF //对应正整数
+	  				temp  =~temp+1 //对应负数
+	  			}
+	  			else{
+	  				temp = data[0]
+	  			}
+	  			temp=temp/10
+	  			return JSON.stringify({something:temp})
+	  		}
+	  		else
+	  		{
+		  		for(i=0;i<data.length;i++){
+		  			if(data[i]>>15){
+		  				temp = data[i]-1 // 反码
+		  				temp = ~temp &0x7FFF //对应正整数
+		  				temp  =~temp+1 //对应负数
+		  			}
+		  			else{
+		  				temp = data[i]
+		  			}
+		  			temp=temp/10
+					res.push({something:temp})
+		  		}
+	 			return JSON.stringify(res)
+ 			}
+ 		}",
+  		slaveid: 1,
+  		address: 0,
+  		funCode: 4,
+  		dataLen: 3
+  	}  	
+ ],
+  modbusSubTopic:[
+ 	{
+  		topic: "homeassistant/switch/WRITE_SINGLE_COIL/set",
+  		label: "WRITE SINGLE COIL TEST",
+  		script: "var processPayLoad=function(payload,n) {
+			if(payload==='ON')
+				return 1
+			else if(payload==='OFF')
+				return 0
+			else
+				return null
+ 		}",
+  		slaveid: 1,
+  		address: 0,
+  		funCode: 5,
+  		dataLen: 1
+  	},
+  	{
+  		topic: "homeassistant/switch/WRITE_MULTIPLE_COILS/set",
+  		label: "WRITE MULTIPLE COILS TEST",
+  		script: "var processPayLoad=function(payload,n) {
+  			var ret=new Array()
+  			var data = payload.split(',')
+  			if(data.length!==n)
+  				return [];
+  			print(data)
+  			for(i=0;i<data.length;i++){
+	  			if(data[i]==='ON'){
+	  				ret.push(0x01)
+	  			}
+	  			else if(data[i]==='OFF'){
+	  				ret.push(0x00)
+	  			}
+	  			else
+	  			{
+	  				ret= null; //清空数组
+	  				break
+	  			}
+	  		}
+	  		return ret
+	  		
+ 		}",
+  		slaveid: 1,
+  		address: 0,
+  		funCode: 0x0F,
+  		dataLen: 10
+  	},
+	{
+  		topic: "homeassistant/register/WRITE_SINGLE_REGISTER/set",
+  		label: "WRITE SINGLE REGISTER TEST",
+  		script: "var processPayLoad=function(payload,n) {
+  			var r = JSON.parse(payload)
+			if(r.something!==null && r.something!==undefined)
+			{
+				return r.something*10
+			}
+			else
+			{
+				return null
+			}
+			
+ 		}",
+  		slaveid: 1,
+  		address: 0,
+  		funCode: 6,
+  		dataLen: 1
+  	},
+  	{
+  		topic: "homeassistant/register/WRITE_MULTIPLE_REGISTERS/set",
+  		label: "WRITE MULTIPLE REGISTERS TEST",
+  		script: "var processPayLoad=function(payload,n) {
+  			print('WRITE MULTIPLE REGISTERS TEST')
+  			var data = JSON.parse(payload)
+  			if(n!==data.length)
+  				return null
+  			var ret=new Array()
+  			for(i=0;i<data.length;i++){
+				if(data[i].something!==null && data[i].something!==undefined)
+				{
+					print(data[i].something)
+					ret.push(data[i].something*10)
+				}
+				else
+				{
+					ret=null
+					break
+				}
+			}
+
+			return ret	  		
+ 		}",
+  		slaveid: 1,
+  		address: 0,
+  		funCode: 0x10,
+  		dataLen: 3
+  	}  	
+ ]
+  
+}
+
+
+// Modbus function codes
+// #define MODBUS_FC_READ_COILS                0x01
+// #define MODBUS_FC_READ_DISCRETE_INPUTS      0x02
+// #define MODBUS_FC_READ_HOLDING_REGISTERS    0x03
+// #define MODBUS_FC_READ_INPUT_REGISTERS      0x04
+
+
+// #define MODBUS_FC_WRITE_SINGLE_COIL         0x05
+// #define MODBUS_FC_WRITE_SINGLE_REGISTER     0x06
+//////////////// #define MODBUS_FC_READ_EXCEPTION_STATUS     0x07
+// #define MODBUS_FC_WRITE_MULTIPLE_COILS      0x0F
+// #define MODBUS_FC_WRITE_MULTIPLE_REGISTERS  0x10
+//////////////// #define MODBUS_FC_REPORT_SLAVE_ID           0x11
+//////////////// #define MODBUS_FC_MASK_WRITE_REGISTER       0x16
+//////////////// #define MODBUS_FC_WRITE_AND_READ_REGISTERS  0x17
+
